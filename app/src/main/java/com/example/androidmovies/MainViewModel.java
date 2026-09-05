@@ -32,12 +32,12 @@ public class MainViewModel extends AndroidViewModel {
     public MainViewModel(@NonNull Application application) {
 
         super(application);
-        loadMovies();
+        loadMovies(); //first loading has been transfered to view model because in vm it can outlast the screen roll
     }
 
     public void loadMovies(){
         Boolean loading = isLoading.getValue();
-        if(loading != null && loading){
+        if(loading != null && loading){ //Boolean type might be null
             return;
         }
         Disposable disposable = ApiFactory.apiService.getMovies(page)
