@@ -14,6 +14,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
@@ -31,6 +32,9 @@ public class MovieDetailActivity extends AppCompatActivity {
     private TextView textViewMovieDescriptionDetailed;
     private MovieDetailViewModel viewModel;
 
+    private RecyclerView recyclerViewTrailers;
+    private TrailersAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +46,9 @@ public class MovieDetailActivity extends AppCompatActivity {
             return insets;
         });
         initViews();
+        adapter = new TrailersAdapter();
+        recyclerViewTrailers.setAdapter(adapter);
+
         viewModel = new ViewModelProvider(this).get(MovieDetailViewModel.class);
         Movie movie = (Movie) getIntent().getSerializableExtra(MOVIE_EXTRA);
         Glide.with(this)
@@ -55,6 +62,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         viewModel.getTrailers().observe(this, new Observer<List<Trailer>>() {
             @Override
             public void onChanged(List<Trailer> trailers) {
+                adapter.setTrailers(trailers);
                 Log.d("MovieDetailActivity", trailers.toString());
             }
         });
@@ -65,6 +73,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         textViewMovieTitleDetailed = findViewById(R.id.textViewMovieTitleDetailed);
         textViewMovieYearDetailed = findViewById(R.id.textViewMovieYearDetailed);
         textViewMovieDescriptionDetailed = findViewById(R.id.textViewMovieDescriptionDetailed);
+        recyclerViewTrailers = findViewById(R.id.recyclerViewTrailers);
+
     }
 
     public static Intent newIntent(Context context, Movie movie){

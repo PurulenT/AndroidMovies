@@ -56,11 +56,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         Glide.with(holder.itemView)
                 .load(movie.getPoster().getUrl())
                 .into(holder.imageViewPoster);
+
         double rating = movie.getRating().getKp();
         int backgroundId;
-        if (rating > 7){
+        if (rating > 7) {
             backgroundId = R.drawable.circle_green;
-        } else if (rating > 5){
+        } else if (rating > 5) {
             backgroundId = R.drawable.circle_yellow;
         } else {
             backgroundId = R.drawable.circle_red;
@@ -68,16 +69,14 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         Drawable background = ContextCompat.getDrawable(holder.itemView.getContext(), backgroundId);
         holder.textViewRating.setBackground(background);
         holder.textViewRating.setText(String.valueOf(rating).substring(0, 3));
-        if(position >= movies.size() - 10 && onReachEndListener != null){
+        if (position >= movies.size() - 10 && onReachEndListener != null) {
             onReachEndListener.onReach();
         }
-
-
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(onMovieClickListener != null){
+                if (onMovieClickListener != null) {
                     onMovieClickListener.onMovieClick(movie);
                 }
             }
@@ -89,7 +88,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         return movies.size();
     }
 
-    class MovieViewHolder extends RecyclerView.ViewHolder{
+    class MovieViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imageViewPoster;
         private TextView textViewRating;
@@ -101,11 +100,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         }
     }
 
-    interface OnReachEndListener{
+    interface OnReachEndListener {
         void onReach();
     }
 
-    interface OnMovieClickListener{
+    interface OnMovieClickListener {
         void onMovieClick(Movie movie);
     }
 }
