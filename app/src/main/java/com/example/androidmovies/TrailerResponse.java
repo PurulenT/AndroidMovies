@@ -12,7 +12,7 @@ public class TrailerResponse {
         this.trailersList = trailersList;
     }
 
-    public TrailersList getVideoList() {
+    public TrailersList getTrailersList() {
         return trailersList;
     }
 
