@@ -21,10 +21,6 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.functions.Consumer;
-import io.reactivex.rxjava3.schedulers.Schedulers;
-
 public class MovieDetailActivity extends AppCompatActivity {
     private final static String MOVIE_EXTRA = "movie";
     private ImageView imageViewPosterDetailed;
@@ -34,7 +30,10 @@ public class MovieDetailActivity extends AppCompatActivity {
     private MovieDetailViewModel viewModel;
 
     private RecyclerView recyclerViewTrailers;
-    private TrailersAdapter adapter;
+    private TrailersAdapter trailersAdapter;
+
+    private RecyclerView recyclerViewReviews;
+    private ReviewAdapter reviewAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +46,12 @@ public class MovieDetailActivity extends AppCompatActivity {
             return insets;
         });
         initViews();
-        adapter = new TrailersAdapter();
-        recyclerViewTrailers.setAdapter(adapter);
+        trailersAdapter = new TrailersAdapter();
+        recyclerViewTrailers.setAdapter(trailersAdapter);
+
+        reviewAdapter = new ReviewAdapter();
+        recyclerViewReviews.setAdapter(reviewAdapter);
+
 
         viewModel = new ViewModelProvider(this).get(MovieDetailViewModel.class);
         Movie movie = (Movie) getIntent().getSerializableExtra(MOVIE_EXTRA);
@@ -63,16 +66,25 @@ public class MovieDetailActivity extends AppCompatActivity {
         viewModel.getTrailers().observe(this, new Observer<List<Trailer>>() {
             @Override
             public void onChanged(List<Trailer> trailers) {
-                adapter.setTrailers(trailers);
+                trailersAdapter.setTrailers(trailers);
                 Log.d("MovieDetailActivity", trailers.toString());
             }
         });
-        adapter.setOnImageClickListener(new TrailersAdapter.OnImageClickListener() {
+        trailersAdapter.setOnImageClickListener(new TrailersAdapter.OnImageClickListener() {
             @Override
             public void onImageClick(Trailer trailer) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(trailer.getUrl()));
                 startActivity(intent);
+            }
+        });
+
+        viewModel.loadReviews(movie.getId());
+        viewModel.getReviews().observe(this, new Observer<List<Review>>() {
+            @Override
+            public void onChanged(List<Review> reviews) {
+                reviewAdapter.setReviewList(reviews);
+                Log.d("MovieDetailActivity", reviews.toString());
             }
         });
     }
@@ -83,7 +95,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         textViewMovieYearDetailed = findViewById(R.id.textViewMovieYearDetailed);
         textViewMovieDescriptionDetailed = findViewById(R.id.textViewMovieDescriptionDetailed);
         recyclerViewTrailers = findViewById(R.id.recyclerViewTrailers);
-
+        recyclerViewReviews = findViewById(R.id.recyclerViewReviews);
     }
 
     public static Intent newIntent(Context context, Movie movie){

@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -21,9 +22,14 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class MovieDetailViewModel extends AndroidViewModel {
     CompositeDisposable compositeDisposable = new CompositeDisposable();
     private final MutableLiveData<List<Trailer>> trailers = new MutableLiveData<>();
+    private final MutableLiveData<List<Review>> reviews = new MutableLiveData<>();
 
     public LiveData<List<Trailer>> getTrailers() {
         return trailers;
+    }
+
+    public LiveData<List<Review>> getReviews() {
+        return reviews;
     }
 
     public MovieDetailViewModel(@NonNull Application application) {
@@ -53,6 +59,33 @@ public class MovieDetailViewModel extends AndroidViewModel {
                 });
         compositeDisposable.add(disposable);
     }
+
+    public void loadReviews(int id){
+        Disposable disposable = ApiFactory.apiService.loadReviews(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(new Function<ReviewResponse, List<Review>>() {
+                    @Override
+                    public List<Review> apply(ReviewResponse reviewResponse) throws Throwable {
+                        return reviewResponse.getReviewList();
+                    }
+                })
+                .subscribe(new Consumer<List<Review>>() {
+                    @Override
+                    public void accept(List<Review> reviewsRx) throws Throwable {
+                        reviews.setValue(reviewsRx);
+                        Log.d("MovieDetailActivity", reviewsRx.toString());
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Throwable {
+                        Log.d("MovieDetailActivity", throwable.toString());
+                    }
+                });
+        compositeDisposable.add(disposable);
+    }
+
+
 
     @Override
     protected void onCleared() {
