@@ -21,6 +21,8 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 public class MovieDetailActivity extends AppCompatActivity {
     private final static String MOVIE_EXTRA = "movie";
     private ImageView imageViewPosterDetailed;
@@ -87,6 +89,11 @@ public class MovieDetailActivity extends AppCompatActivity {
                 Log.d("MovieDetailActivity", reviews.toString());
             }
         });
+
+        MovieDao movieDao = MovieDatabase.getInstance(getApplication()).movieDao();
+        movieDao.insertMovie(movie)
+                .subscribeOn(Schedulers.io())
+                .subscribe();
     }
 
     private void initViews(){
