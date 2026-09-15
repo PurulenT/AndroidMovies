@@ -2,14 +2,17 @@ package com.example.androidmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -21,6 +24,9 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Action;
+import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class MovieDetailActivity extends AppCompatActivity {
@@ -29,11 +35,11 @@ public class MovieDetailActivity extends AppCompatActivity {
     private TextView textViewMovieTitleDetailed;
     private TextView textViewMovieYearDetailed;
     private TextView textViewMovieDescriptionDetailed;
+    private ImageView imageViewStar;
     private MovieDetailViewModel viewModel;
 
     private RecyclerView recyclerViewTrailers;
     private TrailersAdapter trailersAdapter;
-
     private RecyclerView recyclerViewReviews;
     private ReviewAdapter reviewAdapter;
 
@@ -89,11 +95,32 @@ public class MovieDetailActivity extends AppCompatActivity {
                 Log.d("MovieDetailActivity", reviews.toString());
             }
         });
-
-        MovieDao movieDao = MovieDatabase.getInstance(getApplication()).movieDao();
-        movieDao.insertMovie(movie)
-                .subscribeOn(Schedulers.io())
-                .subscribe();
+        Drawable starOn = ContextCompat.getDrawable(this, android.R.drawable.star_big_on);
+        Drawable starOff = ContextCompat.getDrawable(this, android.R.drawable.btn_star_big_off);
+        viewModel.getFavouriteMovie(movie.getId()).observe(this, new Observer<Movie>() {
+            @Override
+            public void onChanged(Movie movieFromDb) {
+                if(movieFromDb == null){
+                    imageViewStar.setImageDrawable(starOff);
+                    imageViewStar.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            viewModel.insertFavouriteMovies(movie);
+                        }
+                    });
+                }
+                else{
+                    imageViewStar.setImageDrawable(starOn);
+                    viewModel.insertFavouriteMovies(movieFromDb);
+                    imageViewStar.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            viewModel.removeFromFavourite(movieFromDb.getId());
+                        }
+                    });
+                }
+            }
+        });
     }
 
     private void initViews(){
@@ -103,6 +130,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         textViewMovieDescriptionDetailed = findViewById(R.id.textViewMovieDescriptionDetailed);
         recyclerViewTrailers = findViewById(R.id.recyclerViewTrailers);
         recyclerViewReviews = findViewById(R.id.recyclerViewReviews);
+        imageViewStar = findViewById(R.id.imageViewStar);
     }
 
     public static Intent newIntent(Context context, Movie movie){
