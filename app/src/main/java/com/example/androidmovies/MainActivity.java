@@ -39,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
         initViews();
+
+        startActivity(FavouriteMovieActivity.newIntent(this));
+
         moviesAdapter = new MoviesAdapter();
         RecyclerViewMovies.setAdapter(moviesAdapter);
         RecyclerViewMovies.setLayoutManager(new GridLayoutManager(this, 2));
